@@ -3,6 +3,7 @@ import random
 import time
 
 # Initial Population of random paths
+# Time Complexity: O(N * D), where N = 20000, D = total destinations
 def generate_random_paths(total_destinations):
     random_paths = []
     for _ in range(20000):
@@ -13,6 +14,7 @@ def generate_random_paths(total_destinations):
     return random_paths
 
 # Calculate total distance between cities of the given path
+# Time Complexity: O(N), where N = total destinations
 def total_distance(points, path):
     distance = 0
     for i in range(1, len(path)):
@@ -21,6 +23,7 @@ def total_distance(points, path):
     return distance
 
 # Reduce the initial population by half, keeping the paths with lower distances
+# Time Complexity: O(N * D)
 def choose_survivors(points, old_generation):
     survivors = []
     random.shuffle(old_generation) #shuffle the old generation to ensure randomness
@@ -35,6 +38,7 @@ def choose_survivors(points, old_generation):
     return survivors
 
 # Create offsprings by applying Order Crossover
+# Time Complexity: O(N) 
 def create_offspring(parent_a, parent_b):
     off_spring = []
     start = random.randint(0, len(parent_a) - 1)
@@ -49,6 +53,7 @@ def create_offspring(parent_a, parent_b):
     return off_spring
 
 # Apply Crossover to the survivors
+# Time Complexity: O(S * N), where S = number of survivors, N = number of points
 def apply_crossovers(survivors):
     offsprings = []
     midway = len(survivors) // 2
@@ -63,23 +68,27 @@ def apply_crossovers(survivors):
 def apply_mutations(generation):
     gen_wt_mutations = []
     for path in generation:
-        if random.randint(0, 1000) < 9:
+        if random.randint(0, 1000) < 9: #pick 0.9% of the population to mutate
+            # Swap two random cities in the path
             index1, index2 = random.randint(1, len(path) - 1), random.randint(1, len(path) - 1)
             path[index1], path[index2] = path[index2], path[index1]
         gen_wt_mutations.append(path)
     return gen_wt_mutations
 
+# Execute onefull genreation: selection -> crossover -> mutation
 def genetic_algorithm(points, old_generation):
     survivors = choose_survivors(points, old_generation)
     crossovers = apply_crossovers(survivors)
     new_population = apply_mutations(crossovers)
     return new_population
 
+# reorder points to make the specified point the sarting point
+# Time Complexity: O(N)
 def remap_points_and_path(city_points, start_city):
     city_names = list(city_points.keys())
     start_index = city_names.index(start_city)
 
-    # Move start city to front
+    # Move the specified point to front
     new_city_names = [city_names[start_index]] + city_names[:start_index] + city_names[start_index+1:]
     new_city_points = {name: city_points[name] for name in new_city_names}
     return list(new_city_points.values()), new_city_names
@@ -93,13 +102,13 @@ city_points = {
     "D": (6, 6),
     "E": (8, 3)
 }
-start_city = "A" 
+start_city = "A" # starting point
 
 # ---------- Prepare ----------
-points, city_names = remap_points_and_path(city_points, start_city)
-old_generation = generate_random_paths(len(points))
+points, city_names = remap_points_and_path(city_points, start_city) # reorder points
+old_generation = generate_random_paths(len(points)) #initialize population
 
-# ---------- Run ----------
+# ---------- Runt the operation 100 times ----------
 start_time = time.time()
 generations = 100
 current_gen = old_generation
